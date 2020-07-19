@@ -3,12 +3,12 @@ import DB
 import Essences
 
 import matplotlib.pyplot as plt
-
+from data_analyzer import DataAnalyzer
 #%%
 class FourthBranch_actions:
     
     def __init__(self, link1, link2):
-        
+        self.analysis_string = ''
         self.link1 = link1
         self.link2 = link2 
         
@@ -26,8 +26,39 @@ class FourthBranch_actions:
             self.communication.create_table_for_comments()
         except:
             pass
+    
+    
+    def sentiment_eng_analysis(self, massive_comments):
         
+        if massive_comments == False:
+            return 'There are no comments on the video, and we cannot analyze it at the moment'
+        else:
+
+            analysis_dictionary = DataAnalyzer.get_eng_analysis(massive_comments)
+            self.analysis_string += f"Анализ первой(положительные) - {analysis_dictionary['positive']}, анализ первой(негативные) - {analysis_dictionary['negative']}"
+            
+        
+        
+    def sentiment_rus_analysis(self, massive_comments):
+        
+        if massive_comments == False:
+            return 'There are no comments on the video, and we cannot analyze it at the moment'
+        else:
+
+            analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
+            self.analysis_string += f"Анализ второй(положительные) - {analysis_dictionary['positive']}, анализ второй(негативные) - {analysis_dictionary['negative']}"
+            
+        
+        
+    def sentiment_dost_analysis(self, massive_comments):
+        
+        if massive_comments == False:
+            return 'There are no comments on the video, and we cannot analyze it at the moment'
+        else:
+            analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
+            self.analysis_string += f"Анализ третьей(положительные) - {analysis_dictionary['positive']}, анализ третьей(негативные) - {analysis_dictionary['negative']}"
               
+            
     def get_channel_info(self, channel):
         
         comments = []  
@@ -35,22 +66,36 @@ class FourthBranch_actions:
         dislikes = []
         commentsCount = []
         views = []
+        analysis = []
+        massive_pos_1 = []
+        massive_neg_1 = []
+        massive_pos_2 = []
+        massive_neg_2 = []
+        massive_pos_3 = []
+        massive_neg_3 = []
+        self.massive_channel_sentiment = []
         list_ids = channel.get_ids_from_video()
         
         for _id in list_ids:
             actuality = self.communication.check_actuality_by_id(_id) 
-                  
+            self.analysis_string = ''
             if actuality == False:
                 
                 try:
                     channel.youtube.get_video_info(_id)
-                    channel.get_comments_text(_id)                                        
-                    channel.write_to_the_database()                    
-                    
+                    channel.get_comments_text(_id)  
+
                     massive_comments = self.communication.print_comments(_id)
                     
                     for comment in massive_comments:
-                        comments.append(comment[1])                    
+                        comments.append(comment[1])
+                        
+                    self.sentiment_eng_analysis(comments)
+                    self.sentiment_rus_analysis(comments)
+                    self.sentiment_dost_analysis(comments)
+                    
+                    channel.write_to_the_database()
+                    
                 except:
                     pass
                 
@@ -59,16 +104,31 @@ class FourthBranch_actions:
             
             video = self.communication.extract_obj_by_id(_id)
             
-            if video == []:
-                pass
-            else:
-                likes.append(int(video[0][5]))
-                dislikes.append(int(video[0][6]))
-                commentsCount.append(int(video[0][4]))
-                views.append(int(video[0][8]))
-                
 
-        basic = Essences.Basic_Information(views, likes, dislikes, commentsCount, comments)
+            likes.append(int(video[0][5]))
+            dislikes.append(int(video[0][6]))
+            commentsCount.append(int(video[0][4]))
+            views.append(int(video[0][8]))
+            analysis_comments = video[0][-2]
+            analysis.append(analysis_comments)
+
+            string = analysis_comments.split('-')
+
+            massive_pos_1.append(float(string[1][1:6]))
+            massive_neg_1.append(float(string[2][1:6]))
+            massive_pos_2.append(float(string[3][1:6]))
+            massive_neg_2.append(float(string[4][1:6]))
+            massive_pos_3.append(float(string[5][1:6]))
+            massive_neg_3.append(float(string[6][1:6]))
+         
+        self.massive_channel_sentiment.append(massive_pos_1)
+        self.massive_channel_sentiment.append(massive_neg_1)
+        self.massive_channel_sentiment.append(massive_pos_2)
+        self.massive_channel_sentiment.append(massive_neg_2)
+        self.massive_channel_sentiment.append(massive_pos_3)
+        self.massive_channel_sentiment.append(massive_neg_3)
+        
+        basic = Essences.Basic_Information(views, likes, dislikes, commentsCount, comments, analysis)
             
         return basic
 
@@ -96,7 +156,8 @@ class FourthBranch_actions:
         ax.set_title('Сравнительная гистограмма по максимальному и минимальному количеству просмотров')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_channel_comparison_1')
+    
     
     def get_histogram_for_dislikes(self):
         
@@ -116,7 +177,7 @@ class FourthBranch_actions:
         ax.set_title('Сравнительная гистограмма по максимальному и минимальному количеству дизлайков')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_channel_comparison_2')
         
         
     def get_histogram_for_likes(self):
@@ -137,7 +198,7 @@ class FourthBranch_actions:
         ax.set_title('Сравнительная гистограмма по максимальному и минимальному количеству лайков')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_channel_comparison_3')
     
     
     def get_histogram_on_the_number_of_comments(self):
@@ -158,13 +219,72 @@ class FourthBranch_actions:
         ax.set_title('Сравнительная гистограмма по максимальному и минимальному количеству комментариев')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_channel_comparison_4')
     
-    def get_histogram_for_analyzing_the_tone_of_comments(self):
+    
+    def get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(self, massive_pos_1, massive_neg_1, massive_pos_2, massive_neg_2):
         
-        pass
-            
+        x1=['positive_1', 'positive_2']
+        x2=['negative_1', 'negative_2']        
+        y1 = [sum(massive_pos_1)/(len(massive_pos_1)), sum(massive_pos_2)/len(massive_pos_2)]
+        y2 = [sum(massive_neg_1)/len(massive_neg_1), sum(massive_neg_2)/len(massive_neg_2)]  
+
+        fig, ax = plt.subplots()
+
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
+        
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью алгоритма первой нейронной сети')
+        fig.set_facecolor('floralwhite')
+        
+        plt.savefig(f'Figures/fig_channel_comparison_5')
     
+    
+    def get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(self, massive_pos_1, massive_neg_1, massive_pos_2, massive_neg_2):
+        
+        x1=['positive_1', 'positive_2']
+        x2=['negative_1', 'negative_2']        
+        y1 = [sum(massive_pos_1)/(len(massive_pos_1)), sum(massive_pos_2)/len(massive_pos_2)]
+        y2 = [sum(massive_neg_1)/len(massive_neg_1), sum(massive_neg_2)/len(massive_neg_2)]  
+
+        fig, ax = plt.subplots()
+
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
+        
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью алгоритма второй нейронной сети')
+        fig.set_facecolor('floralwhite')
+        
+        plt.savefig(f'Figures/fig_channel_comparison_6')
+    
+    
+    def get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(self, massive_pos_1, massive_neg_1, massive_pos_2, massive_neg_2):
+        
+        x1=['positive_1', 'positive_2']
+        x2=['negative_1', 'negative_2']        
+        y1 = [sum(massive_pos_1)/(len(massive_pos_1)), sum(massive_pos_2)/len(massive_pos_2)]
+        y2 = [sum(massive_neg_1)/len(massive_neg_1), sum(massive_neg_2)/len(massive_neg_2)]  
+
+        fig, ax = plt.subplots()
+
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
+        
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью алгоритма третьей нейронной сети')
+        fig.set_facecolor('floralwhite')
+        
+        plt.savefig(f'Figures/fig_channel_comparison_7')
+        
+        
     def comparative_analysis(self):
         
         self.make_objects(self.first_channel, self.second_channel)
@@ -172,12 +292,15 @@ class FourthBranch_actions:
         self.get_histogram_for_dislikes()
         self.get_histogram_for_likes()#надо думать какую #надо думать
         self.get_histogram_on_the_number_of_comments() #надо думать какую
+        self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(self.massive_channel_sentiment[0], self.massive_channel_sentiment[1], self.massive_channel_sentiment[6], self.massive_channel_sentiment[7])
+        self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(self.massive_channel_sentiment[2], self.massive_channel_sentiment[3], self.massive_channel_sentiment[8], self.massive_channel_sentiment[9])
+        self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(self.massive_channel_sentiment[4], self.massive_channel_sentiment[5], self.massive_channel_sentiment[10], self.massive_channel_sentiment[11])
         
                 
 #%%
-#fourth = FourthBranch_actions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC2JsSf2SvjCtbZfdgw3MvGg')
+fourth = FourthBranch_actions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC2JsSf2SvjCtbZfdgw3MvGg')
 ##%%
-#fourth.comparative_analysis()
+fourth.comparative_analysis()
 
 
 

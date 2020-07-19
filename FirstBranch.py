@@ -130,25 +130,6 @@ class FistBranch_actions():
     def get_info_about_video(self):
         
         self.youtube.get_video_info(self.id_video)
-        items = self.data_full_check(self.youtube.all_info)
-        info = f"""
-    ID видеоролика: {items[0]}
-    Название канала: {items[1]}
-    Название видеоролика: {items[2]}
-    Язык по умолчанию: {self.youtube.language}
-    Количество комментариев: {items[3]}
-    Количество лайков: {items[4]}
-    Количество дизлайков: {items[5]}
-    Соотношение лайков и дизлайков: {items[6]},
-    Количество просмотров: {items[7]}
-    Количество tags: {items[8]}
-    Продолжительность видеоролика: {items[9]}
-    Описание видеоролика: 
-        
-{items[10]}
-    
-    """
-        return info
         
         
     def get_comments_text(self):
@@ -188,11 +169,14 @@ class FistBranch_actions():
         if massive_comments == False:
             return 'There are no comments on the video, and we cannot analyze it at the moment'
         else:
-
             analysis_dictionary = DataAnalyzer.get_eng_analysis(massive_comments)
-            
+            self.analysis_string += f"Анализ первой(положительные) - {analysis_dictionary['positive']}, анализ первой(негативные) - {analysis_dictionary['negative']}"
+        
+    
+    def get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(self, value_1, value_2):
+        
             x = ['positive', 'negative']
-            y = [analysis_dictionary['positive'], analysis_dictionary['negative']]
+            y = [value_1, value_2]
         
             fig, ax = plt.subplots()
     
@@ -204,21 +188,22 @@ class FistBranch_actions():
             ax.set_title('Анализ тональности с помощью алгоритма первой нейронной сети')
             fig.set_figheight(6)   
             
-            plt.show()
-
-            self.analysis_string += f"Анализ первой(положительные) - {analysis_dictionary['positive']}, анализ первой(негативные) - {analysis_dictionary['negative']}"
-        
-        
+            plt.savefig(f'Figures/fig_video_{self.id_video}_1')
+            
+            
     def sentiment_rus_analysis(self, massive_comments):
         
         if massive_comments == False:
             return 'There are no comments on the video, and we cannot analyze it at the moment'
         else:
-
             analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
-            
+            self.analysis_string += f"Анализ второй(положительные) - {analysis_dictionary['positive']}, анализ второй(негативные) - {analysis_dictionary['negative']}"
+        
+    
+    def get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(self, value_1, value_2):
+        
             x = ['positive', 'negative']
-            y = [analysis_dictionary['positive'], analysis_dictionary['negative']]
+            y = [value_1, value_2]
         
             fig, ax = plt.subplots()
     
@@ -230,21 +215,22 @@ class FistBranch_actions():
             ax.set_title('Анализ тональности с помощью алгоритма второй нейронной сети')
             fig.set_figheight(6)   
             
-            plt.show()
-
-            self.analysis_string += f"Анализ второй(положительные) - {analysis_dictionary['positive']}, анализ второй(негативные) - {analysis_dictionary['negative']}"
-        
-        
-    def get_dost_analysis(self, massive_comments):
+            plt.savefig(f'Figures/fig_video_{self.id_video}_2')
+            
+            
+    def sentiment_dost_analysis(self, massive_comments):
         
         if massive_comments == False:
             return 'There are no comments on the video, and we cannot analyze it at the moment'
         else:
-
             analysis_dictionary = DataAnalyzer.get_dost_analysis(massive_comments)
-            
+            self.analysis_string += f"Анализ третьей(положительные) - {analysis_dictionary['positive']}, анализ третьей(негативные) - {analysis_dictionary['negative']}"
+
+
+    def get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(self, value_1, value_2):
+
             x = ['positive', 'negative']
-            y = [analysis_dictionary['positive'], analysis_dictionary['negative']]
+            y = [value_1, value_2]
         
             fig, ax = plt.subplots()
     
@@ -256,12 +242,10 @@ class FistBranch_actions():
             ax.set_title('Анализ тональности с помощью алгоритма третьей нейронной сети')
             fig.set_figheight(6)   
             
-            plt.show()
-
-            self.analysis_string += f"Анализ третьей(положительные) - {analysis_dictionary['positive']}, анализ третьей(негативные) - {analysis_dictionary['negative']}"
-
-    
-        
+            plt.savefig(f'Figures/fig_video_{self.id_video}_3')
+            
+            
+            
     def make_WorldCloud_picture(self): 
         
         exist = self.communication.print_comments(self.id_video)
@@ -283,9 +267,8 @@ class FistBranch_actions():
         if actuality == False:
             
             try:
-                print(self.get_info_about_video())
+                self.get_info_about_video()
                 self.get_comments_text()
-
 
                 massive_data = self.communication.print_comments(self.id_video)
 
@@ -294,50 +277,55 @@ class FistBranch_actions():
 
                 self.sentiment_eng_analysis(massive_comments)
                 self.sentiment_rus_analysis(massive_comments)
-                self.get_dost_analysis(massive_comments)
+                self.sentiment_dost_analysis(massive_comments)
 
                 self.write_to_the_database()
+                
+                self.analysis_string = ''
                 
                                
             except:
                  print('There are no comments on the video, and we cannot analyze it at the moment')
             
         else:
-            video = self.communication.extract_obj_by_id(self.id_video)
-            
-            relation = video[0][7].replace('\n', '\n')
-            video_description = video[0][11].replace('\n', '\n')
-            
-            video_info = f"""
+            pass
         
-    ID видеоролика: {video[0][0]}
-    Название канала: {video[0][1]}
-    Название видеоролика: {video[0][2]}   
-    Язык по умолчанию: {video[0][3]}
-    Количество комментариев: {video[0][4]}
-    Количество лайков: {video[0][5]}
-    Количество дизлайков: {video[0][6]}
-    Соотношение лайков и дизлайков: {relation}
-    Количество просмотров: {video[0][8]}
-    Количество tags: {video[0][9]}
-    Продолжительность видеоролика: {video[0][10]}
-    Описание видеоролика: 
+        video = self.communication.extract_obj_by_id(self.id_video)
         
+        relation = video[0][7].replace('\n', '\n')
+        video_description = video[0][11].replace('\n', '\n')
+        
+        video_info = f"""
+    
+ID видеоролика: {video[0][0]}
+Название канала: {video[0][1]}
+Название видеоролика: {video[0][2]}   
+Язык по умолчанию: {video[0][3]}
+Количество комментариев: {video[0][4]}
+Количество лайков: {video[0][5]}
+Количество дизлайков: {video[0][6]}
+Соотношение лайков и дизлайков: {relation}
+Количество просмотров: {video[0][8]}
+Количество tags: {video[0][9]}
+Продолжительность видеоролика: {video[0][10]}
+Описание видеоролика: 
+    
 {video_description} """
-            
-            print(video_info)
+        
+        print(video_info)
+        
+        analysis = video[0][-2]
+        string = analysis.split('-')
 
-            list_comments = self.communication.print_comments(self.id_video)
-
-            for comments in list_comments:
-                massive_comments.append(comments[1])
-            
-            self.sentiment_eng_analysis(massive_comments)
-            self.sentiment_rus_analysis(massive_comments)
-            self.get_dost_analysis(massive_comments)
+        self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(float(string[1][1:6]), float(string[2][1:6]))
+        self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(float(string[3][1:6]), float(string[4][1:6]))
+        self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(float(string[5][1:6]), float(string[6][1:6]))
+        
         string = f"""Точность первой нейронной сети: {self.sentiment['EngModel']}
         Точность второй нейронной сети: {self.sentiment['RusModel']}
         Точность третьей нейронной сети: {self.sentiment['DostModel']}"""
+        
+        print(string)
             
 # #%%
 first = FistBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s')

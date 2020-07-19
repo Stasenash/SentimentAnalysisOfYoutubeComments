@@ -268,7 +268,7 @@ class SecondBranch_actions:
         ax.set_title('Сравнительная гистограмма по анализу тональности с помощью алгоритмов нейронных сетей')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_channel_1')
         
         
     def get_info_from_video(self):
@@ -306,23 +306,7 @@ class SecondBranch_actions:
                     self.sentiment_dost_analysis(massive_comments)              
                     
                     self.write_to_the_database()
-                    
-#                    video = self.communication.extract_obj_by_id(_id)
-#
-#                    self.likes.append(int(video[0][5]))
-#                    self.dislikes.append(int(video[0][6]))
-#                    self.commentsCount.append(int(video[0][4]))
-#                    self.views.append(int(video[0][8]))
-#                    
-#                    analysis = video[0][-2]
-#                    string = analysis.split('-')
-#                    
-#                    self.massive_pos_1.append(int(string[1][1]))
-#                    self.massive_neg_1.append(int(string[2][1]))
-#                    self.massive_pos_2.append(int(string[3][1]))
-#                    self.massive_neg_2.append(int(string[4][1]))
-#                    self.massive_pos_3.append(int(string[5][1]))
-#                    self.massive_neg_3.append(int(string[6][1]))
+                    self.analysis_string = ''
                     
                 except:
                     pass
@@ -340,18 +324,13 @@ class SecondBranch_actions:
             analysis = video[0][-2]
             string = analysis.split('-')
             
-            self.massive_pos_1.append(int(string[1][1]))
-            self.massive_neg_1.append(int(string[2][1]))
-            self.massive_pos_2.append(int(string[3][1]))
-            self.massive_neg_2.append(int(string[4][1]))
-            self.massive_pos_3.append(int(string[5][1]))
-            self.massive_neg_3.append(int(string[6][1]))
+            self.massive_pos_1.append(float(string[1][1:6]))
+            self.massive_neg_1.append(float(string[2][1:6]))
+            self.massive_pos_2.append(float(string[3][1:6]))
+            self.massive_neg_2.append(float(string[4][1:6]))
+            self.massive_pos_3.append(float(string[5][1:6]))
+            self.massive_neg_3.append(float(string[6][1:6]))
             
-                
-        
-   
-#−	Анализ тональности тремя (двумя) алгоритмами, в виде гистограммы, показывающей процентное соотношение положительно и отрицательно окрашенных комментариев (среднее по всем видео)
-#−	Точность работы алгоритмов анализа тональности
         
     def analysis_of_comments_for_a_single_channel(self):
         
@@ -372,17 +351,17 @@ class SecondBranch_actions:
                               self.massive_neg_2,
                               self.massive_pos_3,
                               self.massive_neg_3)
-            
         string = f"""Точность первой нейронной сети: {self.sentiment['EngModel']}
                      Точность второй нейронной сети: {self.sentiment['RusModel']}
-                     Точность третьей нейронной сети: {self.sentiment['DostModel']}"""
+                     Точность третьей нейронной сети: {self.sentiment['DostModel']}"""   
+        print(string)
         
         
 #%%
-second = SecondBranch_actions('https://www.youtube.com/user/InokTV')
-##%%
-second.analysis_of_comments_for_a_single_channel()
-#
-##%%
-second.make_WorldCloud_picture()
-#%%'
+#second = SecondBranch_actions('https://www.youtube.com/user/InokTV')
+###%%
+#second.analysis_of_comments_for_a_single_channel()
+##
+###%%
+#second.make_WorldCloud_picture()
+##%%'

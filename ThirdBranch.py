@@ -83,20 +83,16 @@ class ThirdBranch_actions:
             
             youtube_video.sentiment_eng_analysis(comments)
             youtube_video.sentiment_rus_analysis(comments)
-            youtube_video.get_dost_analysis(comments)
+            youtube_video.sentiment_dost_analysis(comments)
                
             youtube_video.write_to_the_database()
-            # video_data = self.communication.extract_obj_by_id(video_id)
-            # analysis = video_data[0][-2]
-            #
-            # information = youtube_video.youtube.all_info
-            # viewsCount = int(information['statistics']['viewCount'])
-            # likesCount = int(information['statistics']['likeCount'])
-            # dislikesCount = int(information['statistics']['dislikeCount'])
-            # commentsCount = int(information['statistics']['commentCount'])
+            
+            youtube_video.analysis_string = ''
+
 
         else:
             pass
+        
         video = self.communication.extract_obj_by_id(video_id)
         viewsCount = int(video[0][8])
         likesCount = int(video[0][5])
@@ -116,64 +112,77 @@ class ThirdBranch_actions:
     
     def get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(self):
         
-        x = ['positive', 'negative']
-        string = self.one.analysis.split("-")
+        string1 = self.one.analysis.split("-")
+        string2 = self.two.analysis.split("-")
         
-            
-        y = [int(string[1][1]), int(string[2][1])]
+        x1 = ['positive_1', 'positive_2']
+        x2 = ['negative_1', 'negative_2']
+        y1 = [float(string1[1][1:6]), float(string2[1][1:6])]
+        y2 = [float(string1[2][1:6]), float(string2[2][1:6])]
         
         fig, ax = plt.subplots()
 
-        ax.bar(x, y, width = 0.15)
+        fig, ax = plt.subplots()
 
-        ax.set_facecolor('seashell')
-        fig.set_facecolor('floralwhite')
-        fig.set_figwidth(6) 
-        ax.set_title('Сравнительная гистограмма по анализу тональности комментариев с помощью первой нейросети')
-        fig.set_figheight(6)   
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
         
-        plt.show()
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью первого алгоритма нейронной сети')
+        fig.set_facecolor('floralwhite')
+        plt.savefig(f'Figures/fig_video_comparison_1')
         
         
     def get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(self):
         
-        x = ['positive', 'negative']
-        string = self.one.analysis.split("-")
+        string1 = self.one.analysis.split("-")
+        string2 = self.two.analysis.split("-")
         
-            
-        y = [int(string[3][1]), int(string[4][1])]
+        x1 = ['positive_1', 'positive_2']
+        x2 = ['negative_1', 'negative_2']
+        y1 = [float(string1[3][1:6]), float(string2[3][1:6])]
+        y2 = [float(string1[4][1:6]), float(string2[4][1:6])]
         
         fig, ax = plt.subplots()
 
-        ax.bar(x, y, width = 0.15)
+        fig, ax = plt.subplots()
 
-        ax.set_facecolor('seashell')
-        fig.set_facecolor('floralwhite')
-        fig.set_figwidth(6) 
-        ax.set_title('Сравнительная гистограмма по анализу тональности комментариев с помощью второй нейросети')
-        fig.set_figheight(6)   
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
         
-        plt.show()
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью второго алгоритма нейронной сети')
+        fig.set_facecolor('floralwhite')
+        plt.savefig(f'Figures/fig_video_comparison_2')
+        
         
     def get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(self):
         
-        x = ['positive', 'negative']
-        string = self.one.analysis.split("-")
+        string1 = self.one.analysis.split("-")
+        string2 = self.two.analysis.split("-")
         
-            
-        y = [int(string[5][1]), int(string[6][1])]
+        x1 = ['positive_1', 'positive_2']
+        x2 = ['negative_1', 'negative_2']
+        y1 = [float(string1[5][1:6]), float(string2[5][1:6])]
+        y2 = [float(string1[6][1:6]), float(string2[6][1:6])]
         
         fig, ax = plt.subplots()
 
-        ax.bar(x, y, width = 0.15)
+        fig, ax = plt.subplots()
 
-        ax.set_facecolor('seashell')
-        fig.set_facecolor('floralwhite')
-        fig.set_figwidth(6) 
-        ax.set_title('Сравнительная гистограмма по анализу тональности комментариев с помощью третьей нейросети')
-        fig.set_figheight(6)   
+        ax.bar(x1, y1, width = 0.4)
+        ax.bar(x2, y2, width = 0.4)
         
-        plt.show()  
+        ax.set_facecolor('seashell')
+        fig.set_figwidth(6)    
+        fig.set_figheight(6)   
+        ax.set_title('Сравнительная гистограмма по анализу тональности с помощью третьего алгоритма нейронной сети')
+        fig.set_facecolor('floralwhite')
+        plt.savefig(f'Figures/fig_video_comparison_3')
         
         
     def get_histogram_by_number_of_views(self):
@@ -190,7 +199,7 @@ class ThirdBranch_actions:
         ax.set_title('Сравнительная гистограмма по количеству просмотров')
         fig.set_figheight(6)   
         
-        plt.show()
+        plt.savefig(f'Figures/fig_video_comparison_4')
     
     def get_histogram_for_likes_and_dislikes(self):
         x1 = ['Likes_1', 'Likes_2']
@@ -209,7 +218,7 @@ class ThirdBranch_actions:
         ax.set_title('Сравнительная гистограмма по лайкам и дизлайкам')
         fig.set_facecolor('floralwhite')
         
-        plt.show()
+        plt.savefig(f'Figures/fig_video_comparison_5')
     
     def get_histogram_on_the_number_of_comments(self):
         
@@ -225,21 +234,19 @@ class ThirdBranch_actions:
         ax.set_title('Сравнительная гистограмма по количеству комментариев')
         fig.set_figheight(6)   
         
-        plt.show()
-    
-
+        plt.savefig(f'Figures/fig_video_comparison_6')
             
     
     def comparative_analysis(self):
         
         self.make_objects(self.first_video, self.second_video)
-        self.get_histogram_by_number_of_views() #надо думать какую
-        self.get_histogram_for_likes_and_dislikes() #надо думать
-        self.get_histogram_on_the_number_of_comments() #надо думать какую
+        self.get_histogram_by_number_of_views() 
+        self.get_histogram_for_likes_and_dislikes() 
+        self.get_histogram_on_the_number_of_comments() 
         self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network()
         self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network()
         self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network()
 #%%
-third = ThirdBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
-#%%
-third.comparative_analysis()
+#third = ThirdBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
+##%%
+#third.comparative_analysis()
