@@ -112,8 +112,8 @@ class GetDescryption():
             plt.figure(figsize=(10, 10))
             plt.title('Most common words')
             plt.imshow(wc, interpolation="bilinear")
+            wc.to_file("Figures/parrot_new.png")
 
-            
         else:
             print('We cannot plot a chart because there are no subtitles for the video')
             
