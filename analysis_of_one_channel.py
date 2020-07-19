@@ -12,7 +12,7 @@ import pymorphy2
 from tqdm import tqdm
 import matplotlib.pyplot as plt
 #%%
-class SecondBranch_actions:
+class AnalysisOfOneChannelActions:
     
     def __init__(self, channel_link):
         

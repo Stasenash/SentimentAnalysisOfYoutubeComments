@@ -2,6 +2,7 @@ import telebot
 import keyboards
 import states
 from analysis_of_one_video import AnalysisOfOneVideoActions
+from analysis_of_two_videos import AnalysisOfTwoVideosActions
 import DB
 
 DataBase = DB.Video_DB('VideoDatabase')
@@ -143,8 +144,7 @@ def processing_message(message):
                          reply_markup=keyboards.back_keyboard())
         SetState(message, 52)
 
-    elif message.text == "Wordcloud":
-        bot.send_message(message.chat.id, "Выводим wordcloud анализ", reply_markup=keyboards.back_keyboard())
+
         # занесение в бд
         # картинка
 
@@ -165,27 +165,48 @@ def processing_message(message):
 
     elif message.text[0:31] == "https://www.youtube.com/watch?v":
         if GetState(message) == 1:
-            link_video1 = message.text
-            analysis_a_single_video = AnalysisOfOneVideoActions(link_video1)
-            bot.send_message(message.chat.id, "Анализ комментариев может занять некоторое время, пожалуйста, дождитесь результата.")
-            video_info, string = analysis_a_single_video.analysis_of_comments_for_a_single_video()
-            bot.send_message(message.chat.id, video_info)
-            bot.send_message(message.chat.id, string)
-            # занесение в бд дей - ия пользователя
-            for i in range(1,4):
-                photo = open(f'Figures/fig_video_{analysis_a_single_video.id_video}_{i}.png', 'rb')
-                bot.send_photo(message.chat.id, photo)
+            try:
+                link_video1 = message.text
+                analysis_a_single_video = AnalysisOfOneVideoActions(link_video1)
+                bot.send_message(message.chat.id, "Анализ комментариев может занять некоторое время, пожалуйста, дождитесь результата.")
+                video_info, string = analysis_a_single_video.analysis_of_comments_for_a_single_video()
+                bot.send_message(message.chat.id, video_info)
+                bot.send_message(message.chat.id, string)
+                # занесение в бд дей - ия пользователя
+                for i in range(1,4):
+                    photo = open(f'Figures/fig_video_{analysis_a_single_video.id_video}_{i}.png', 'rb')
+                    bot.send_photo(message.chat.id, photo)
+                # bot.send_message(message.chat.id, "Хотите получить wordcloud анализ?", reply_markup=keyboards.wordcloud_keyboard())
+                # if message.text == "Wordcloud":
+                # if message.text == "Wordcloud":
+                #     analysis_a_single_video.make_WorldCloud_picture()
+                #     bot.send_message(message.chat.id, "Выводим wordcloud анализ")
+                #     wphoto = open('Figures/picture_new.png', 'rb')
+                #     bot.send_photo(message.chat.id, wphoto)
+            except:
+                bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
+                                                  "не исправляется - попробуйте удалить чат с ботом и попробовать "
+                                                  "сначала")
             SetState(message, 0)
+        # elif GetState(message) == 8:
+        #     bot.send_message(message.chat.id, "Выводим wordcloud анализ", reply_markup=keyboards.back_keyboard())
+        #     wphoto = open('Figures/picture_new.png', 'rb')
+        #     bot.send_photo(message.chat.id, wphoto)
+        #     SetState(message, 0)
 
         elif GetState(message) == 31:
-            link_video31 = message.text
+            bot.link_video31 = message.text
             SetState(message, 32)
             bot.send_message(message.chat.id, "Введите ссылку на второе видео", reply_markup=keyboards.back_keyboard())
 
         elif GetState(message) == 32:
             link_video32 = message.text
             bot.send_message(message.chat.id, "Выводим анализ", reply_markup=keyboards.back_keyboard())
-            # отдать статистику
+            compare_the_two_videos = AnalysisOfTwoVideosActions(bot.link_video31, link_video32)
+            compare_the_two_videos.comparative_analysis()
+            for i in range(1, 7):
+                photo = open(f'Figures/fig_video_comparison_{i}.png', 'rb')
+                bot.send_photo(message.chat.id, photo)
             # записываем действия
             SetState(message, 0)
 

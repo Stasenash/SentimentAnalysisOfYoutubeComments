@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 from urllib.parse import urlparse
 
 #%%
-class ThirdBranch_actions:
+class AnalysisOfTwoVideosActions:
     
     def __init__(self, link1, link2):
         
@@ -117,8 +117,8 @@ class ThirdBranch_actions:
         
         x1 = ['positive_1', 'positive_2']
         x2 = ['negative_1', 'negative_2']
-        y1 = [float(string1[1][1:6]), float(string2[1][1:6])]
-        y2 = [float(string1[2][1:6]), float(string2[2][1:6])]
+        y1 = [float(string1[1][1:5]), float(string2[1][1:5])]
+        y2 = [float(string1[2][1:5]), float(string2[2][1:5])]
         
         fig, ax = plt.subplots()
 
@@ -142,8 +142,8 @@ class ThirdBranch_actions:
         
         x1 = ['positive_1', 'positive_2']
         x2 = ['negative_1', 'negative_2']
-        y1 = [float(string1[3][1:6]), float(string2[3][1:6])]
-        y2 = [float(string1[4][1:6]), float(string2[4][1:6])]
+        y1 = [float(string1[3][1:5]), float(string2[3][1:5])]
+        y2 = [float(string1[4][1:5]), float(string2[4][1:5])]
         
         fig, ax = plt.subplots()
 
@@ -167,8 +167,8 @@ class ThirdBranch_actions:
         
         x1 = ['positive_1', 'positive_2']
         x2 = ['negative_1', 'negative_2']
-        y1 = [float(string1[5][1:6]), float(string2[5][1:6])]
-        y2 = [float(string1[6][1:6]), float(string2[6][1:6])]
+        y1 = [float(string1[5][1:5]), float(string2[5][1:5])]
+        y2 = [float(string1[6][1:5]), float(string2[6][1:5])]
         
         fig, ax = plt.subplots()
 
@@ -246,7 +246,7 @@ class ThirdBranch_actions:
         self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network()
         self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network()
         self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network()
-#%%
-third = ThirdBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
-#%%
-third.comparative_analysis()
+# #%%
+# third = AnalysisOfTwoVideosActions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
+# #%%
+# third.comparative_analysis()
