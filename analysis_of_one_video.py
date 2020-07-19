@@ -13,7 +13,7 @@ import pymorphy2
 import matplotlib.pyplot as plt
 
 #%%  
-class FistBranch_actions():
+class AnalysisOfOneVideoActions():
     
     def __init__(self, link):
         
@@ -186,7 +186,7 @@ class FistBranch_actions():
             fig.set_facecolor('floralwhite')
             fig.set_figwidth(6) 
             ax.set_title('Анализ тональности с помощью алгоритма первой нейронной сети')
-            fig.set_figheight(6)   
+            fig.set_figheight(5)
             
             plt.savefig(f'Figures/fig_video_{self.id_video}_1')
             
@@ -213,7 +213,7 @@ class FistBranch_actions():
             fig.set_facecolor('floralwhite')
             fig.set_figwidth(6) 
             ax.set_title('Анализ тональности с помощью алгоритма второй нейронной сети')
-            fig.set_figheight(6)   
+            fig.set_figheight(5)
             
             plt.savefig(f'Figures/fig_video_{self.id_video}_2')
             
@@ -240,7 +240,7 @@ class FistBranch_actions():
             fig.set_facecolor('floralwhite')
             fig.set_figwidth(6) 
             ax.set_title('Анализ тональности с помощью алгоритма третьей нейронной сети')
-            fig.set_figheight(6)   
+            fig.set_figheight(5)
             
             plt.savefig(f'Figures/fig_video_{self.id_video}_3')
             
@@ -311,21 +311,20 @@ ID видеоролика: {video[0][0]}
 Описание видеоролика: 
     
 {video_description} """
-        
-        print(video_info)
+
         
         analysis = video[0][-2]
         string = analysis.split('-')
 
-        self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(float(string[1][1:6]), float(string[2][1:6]))
-        self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(float(string[3][1:6]), float(string[4][1:6]))
-        self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(float(string[5][1:6]), float(string[6][1:6]))
+        self.get_histogram_for_analyzing_the_tone_of_comments_first_neural_network(float(string[1][1:5]), float(string[2][1:5]))
+        self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network(float(string[3][1:5]), float(string[4][1:5]))
+        self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network(float(string[5][1:5]), float(string[6][1:5]))
         
         string = f"""Точность первой нейронной сети: {self.sentiment['EngModel']}
-        Точность второй нейронной сети: {self.sentiment['RusModel']}
-        Точность третьей нейронной сети: {self.sentiment['DostModel']}"""
-        
-        print(string)
+Точность второй нейронной сети: {self.sentiment['RusModel']}
+Точность третьей нейронной сети: {self.sentiment['DostModel']}"""
+
+        return video_info, string
             
 # #%%
 # first = FistBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s')

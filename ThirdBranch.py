@@ -1,4 +1,4 @@
-import FirstBranch
+import analysis_of_one_video
 import DB
 import Essences
 
@@ -17,8 +17,8 @@ class ThirdBranch_actions:
             print('Please enter two different links so that we can perform the analysis')
             
         else:
-            self.first_video = FirstBranch.FistBranch_actions(link1)
-            self.second_video = FirstBranch.FistBranch_actions(link2)
+            self.first_video = analysis_of_one_video.AnalysisOfOneVideoActions(link1)
+            self.second_video = analysis_of_one_video.AnalysisOfOneVideoActions(link2)
                         
         try:
             video_database = DB.Video_DB('VideoDatabase')
