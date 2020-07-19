@@ -8,7 +8,7 @@ from data_analyzer import DataAnalyzer
 class FourthBranch_actions:
     
     def __init__(self, link1, link2):
-        self.analysis_string = ''
+
         self.link1 = link1
         self.link2 = link2 
         
@@ -27,38 +27,38 @@ class FourthBranch_actions:
         except:
             pass
     
-    
-    def sentiment_eng_analysis(self, massive_comments):
-        
-        if massive_comments == False:
-            return 'There are no comments on the video, and we cannot analyze it at the moment'
-        else:
-
-            analysis_dictionary = DataAnalyzer.get_eng_analysis(massive_comments)
-            self.analysis_string += f"Анализ первой(положительные) - {analysis_dictionary['positive']}, анализ первой(негативные) - {analysis_dictionary['negative']}"
-            
-        
-        
-    def sentiment_rus_analysis(self, massive_comments):
-        
-        if massive_comments == False:
-            return 'There are no comments on the video, and we cannot analyze it at the moment'
-        else:
-
-            analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
-            self.analysis_string += f"Анализ второй(положительные) - {analysis_dictionary['positive']}, анализ второй(негативные) - {analysis_dictionary['negative']}"
-            
-        
-        
-    def sentiment_dost_analysis(self, massive_comments):
-        
-        if massive_comments == False:
-            return 'There are no comments on the video, and we cannot analyze it at the moment'
-        else:
-            analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
-            self.analysis_string += f"Анализ третьей(положительные) - {analysis_dictionary['positive']}, анализ третьей(негативные) - {analysis_dictionary['negative']}"
-              
-            
+    #
+    # def sentiment_eng_analysis(self, massive_comments):
+    #
+    #     if massive_comments == False:
+    #         return 'There are no comments on the video, and we cannot analyze it at the moment'
+    #     else:
+    #
+    #         analysis_dictionary = DataAnalyzer.get_eng_analysis(massive_comments)
+    #         self.analysis_string += f"Анализ первой(положительные) - {analysis_dictionary['positive']}, анализ первой(негативные) - {analysis_dictionary['negative']}"
+    #
+    #
+    #
+    # def sentiment_rus_analysis(self, massive_comments):
+    #
+    #     if massive_comments == False:
+    #         return 'There are no comments on the video, and we cannot analyze it at the moment'
+    #     else:
+    #
+    #         analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
+    #         self.analysis_string += f"Анализ второй(положительные) - {analysis_dictionary['positive']}, анализ второй(негативные) - {analysis_dictionary['negative']}"
+    #
+    #
+    #
+    # def sentiment_dost_analysis(self, massive_comments):
+    #
+    #     if massive_comments == False:
+    #         return 'There are no comments on the video, and we cannot analyze it at the moment'
+    #     else:
+    #         analysis_dictionary = DataAnalyzer.get_rus_analysis(massive_comments)
+    #         self.analysis_string += f"Анализ третьей(положительные) - {analysis_dictionary['positive']}, анализ третьей(негативные) - {analysis_dictionary['negative']}"
+    #
+    #
     def get_channel_info(self, channel):
         
         comments = []  
@@ -75,58 +75,65 @@ class FourthBranch_actions:
         massive_neg_3 = []
         self.massive_channel_sentiment = []
         list_ids = channel.get_ids_from_video()
-        
-        for _id in list_ids:
-            actuality = self.communication.check_actuality_by_id(_id) 
-            self.analysis_string = ''
-            if actuality == False:
-                
-                try:
-                    channel.youtube.get_video_info(_id)
-                    channel.get_comments_text(_id)  
+        if not list_ids:
+            print('Channel has not got a playlists')
+        else:
+            for _id in list_ids:
+                actuality = self.communication.check_actuality_by_id(_id)
+                if actuality == False:
 
-                    massive_comments = self.communication.print_comments(_id)
-                    
-                    for comment in massive_comments:
-                        comments.append(comment[1])
-                        
-                    self.sentiment_eng_analysis(comments)
-                    self.sentiment_rus_analysis(comments)
-                    self.sentiment_dost_analysis(comments)
-                    
-                    channel.write_to_the_database()
-                    
+                    try:
+                        channel.youtube.get_video_info(_id)
+                        channel.get_comments_text(_id)
+
+                        massive_comments = self.communication.print_comments(_id)
+
+                        for comment in massive_comments:
+                            comments.append(comment[1])
+
+                        channel.sentiment_eng_analysis(comments)
+                        channel.sentiment_rus_analysis(comments)
+                        channel.sentiment_dost_analysis(comments)
+
+                        channel.write_to_the_database()
+                        channel.analysis_string = ''
+
+                    except:
+                        pass
+
+                else:
+                    pass
+
+                try:
+                    video = self.communication.extract_obj_by_id(_id)
+
+
+                    likes.append(int(video[0][5]))
+                    dislikes.append(int(video[0][6]))
+                    commentsCount.append(int(video[0][4]))
+                    views.append(int(video[0][8]))
+                    analysis_comments = video[0][-2]
+                    analysis.append(analysis_comments)
+
+                    string = analysis_comments.split('-')
+
+                    massive_pos_1.append(float(string[1][1:6]))
+                    massive_neg_1.append(float(string[2][1:6]))
+                    massive_pos_2.append(float(string[3][1:6]))
+                    massive_neg_2.append(float(string[4][1:6]))
+                    massive_pos_3.append(float(string[5][1:6]))
+                    massive_neg_3.append(float(string[6][1:6]))
                 except:
                     pass
-                
-            else:
+            try:
+                self.massive_channel_sentiment.append(massive_pos_1)
+                self.massive_channel_sentiment.append(massive_neg_1)
+                self.massive_channel_sentiment.append(massive_pos_2)
+                self.massive_channel_sentiment.append(massive_neg_2)
+                self.massive_channel_sentiment.append(massive_pos_3)
+                self.massive_channel_sentiment.append(massive_neg_3)
+            except:
                 pass
-            
-            video = self.communication.extract_obj_by_id(_id)
-            
-
-            likes.append(int(video[0][5]))
-            dislikes.append(int(video[0][6]))
-            commentsCount.append(int(video[0][4]))
-            views.append(int(video[0][8]))
-            analysis_comments = video[0][-2]
-            analysis.append(analysis_comments)
-
-            string = analysis_comments.split('-')
-
-            massive_pos_1.append(float(string[1][1:6]))
-            massive_neg_1.append(float(string[2][1:6]))
-            massive_pos_2.append(float(string[3][1:6]))
-            massive_neg_2.append(float(string[4][1:6]))
-            massive_pos_3.append(float(string[5][1:6]))
-            massive_neg_3.append(float(string[6][1:6]))
-         
-        self.massive_channel_sentiment.append(massive_pos_1)
-        self.massive_channel_sentiment.append(massive_neg_1)
-        self.massive_channel_sentiment.append(massive_pos_2)
-        self.massive_channel_sentiment.append(massive_neg_2)
-        self.massive_channel_sentiment.append(massive_pos_3)
-        self.massive_channel_sentiment.append(massive_neg_3)
         
         basic = Essences.Basic_Information(views, likes, dislikes, commentsCount, comments, analysis)
             
@@ -298,7 +305,7 @@ class FourthBranch_actions:
         
                 
 #%%
-fourth = FourthBranch_actions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC2JsSf2SvjCtbZfdgw3MvGg')
+fourth = FourthBranch_actions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC9FSprjbRqHtsfxbxVO_JWA')
 ##%%
 fourth.comparative_analysis()
 

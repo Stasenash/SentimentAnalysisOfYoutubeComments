@@ -138,7 +138,7 @@ class SecondBranch_actions:
             
             return list_ids
         except:
-            print('The channel does not have playlists')
+            return False
     
     
     def make_WorldCloud_picture(self): 

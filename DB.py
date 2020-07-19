@@ -35,7 +35,7 @@ class Video_DB:
                         (_id text, comment text,
                         FOREIGN KEY (_id) REFERENCES {self.table_name}(video_id) ON DELETE CASCADE)""")
         self.close()
-    
+        
     
     def insert_into_comments_table(self, _id, comment):
         
@@ -158,7 +158,48 @@ class Video_DB:
             count += 1
             
         return text
+        self.close()
+    
+
+    def create_user_table(self):
         
+        self.connect()
+        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS User 
+                        (user_name text PRIMARY KEY, status text, date text)""")
+        self.close() 
+        
+     
+    def insert_into_user_table(self, user_name, user_status):
+        
+        self.connect()
+        date_of_entry = dt.date.today()
+        self.cursor.execute(f"""INSERT INTO User VALUES ('{user_name}', '{user_status}', '{date_of_entry}')""")
+        self.close()
+        
+    
+    def print_user_table(self):
+        
+        self.connect()
+        self.cursor.execute(f"SELECT * from User")
+        result = self.cursor.fetchall()            
+        return result
+        self.close()
+        
+        
+    def update_state_in_user_table(self, user_name, number_state):
+        
+        self.connect()
+        self.cursor.execute(f"UPDATE User set status = '{number_state}' where user_name = '{user_name}'")
+        self.close()
+
+
+    def get_user_state(self, user_name):
+
+        self.connect()
+        self.cursor.execute(f"select * from User where user_name = '{user_name}'")
+        result = self.cursor.fetchall()
+        return result
+        self.close()
 #%%
 class Interaction:
     
@@ -212,5 +253,26 @@ class Interaction:
     def print_favorites_table(self, user_id):
         string = self.database.print_favorites_table(user_id)
         return string
+    
+    
+    def create_user_table(self):
+        self.database.create_user_table()
+        
+        
+    def insert_into_user_table(self, user_name, user_status):  
+        self.database.insert_into_user_table(user_name, user_status)
+        
+    
+    def print_user_table(self):
+        result = self.database.print_user_table()
+        print(result)
+        
+        
+    def update_state_in_user_table(self, user_name, number_state):
+        self.database.update_state_in_user_table(user_name, number_state)
+
+    def get_user_state(self, user_name):
+        result = self.database.get_user_state(user_name)
+        return result
 #%%
         
