@@ -247,6 +247,6 @@ class ThirdBranch_actions:
         self.get_histogram_for_analyzing_the_tone_of_comments_second_neural_network()
         self.get_histogram_for_analyzing_the_tone_of_comments_third_neural_network()
 #%%
-#third = ThirdBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
-##%%
-#third.comparative_analysis()
+third = ThirdBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s', 'https://www.youtube.com/watch?v=lrS7H0eqYww')
+#%%
+third.comparative_analysis()

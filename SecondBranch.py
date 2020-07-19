@@ -357,11 +357,11 @@ class SecondBranch_actions:
         print(string)
         
         
-#%%
-#second = SecondBranch_actions('https://www.youtube.com/user/InokTV')
-###%%
-#second.analysis_of_comments_for_a_single_channel()
-##
-###%%
-#second.make_WorldCloud_picture()
-##%%'
+# #%%
+# second = SecondBranch_actions('https://www.youtube.com/user/InokTV')
+# ##%%
+# second.analysis_of_comments_for_a_single_channel()
+# #
+# ##%%
+# second.make_WorldCloud_picture()
+# #%%'

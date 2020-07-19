@@ -328,8 +328,8 @@ ID видеоролика: {video[0][0]}
         print(string)
             
 # #%%
-first = FistBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s')
-# #%%
-first.analysis_of_comments_for_a_single_video()
-# #%%
-first.make_WorldCloud_picture()
+# first = FistBranch_actions('https://www.youtube.com/watch?v=YUMDorxFHHQ&t=2s')
+# # #%%
+# first.analysis_of_comments_for_a_single_video()
+# # #%%
+# first.make_WorldCloud_picture()
