@@ -200,6 +200,51 @@ class Video_DB:
         result = self.cursor.fetchall()
         return result
         self.close()
+
+
+    def create_statistic_table(self):
+
+        self.connect()
+        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS Statistic 
+                        (u_name text, action text, date text,
+                        FOREIGN KEY (u_name) REFERENCES User (user_name) ON DELETE CASCADE)""")
+        self.close()
+
+
+    def insert_into_statistic_table(self, name, action):
+
+        self.connect()
+        date_of_entry = dt.date.today()
+        self.cursor.execute(f"""INSERT INTO User VALUES ('{name}', '{action}', '{date_of_entry}')""")
+        self.close()
+
+
+    def print_statistic_table(self):
+
+        self.connect()
+        self.cursor.execute(f"SELECT * from Statistic")
+        result = self.cursor.fetchall()
+        return result
+        self.close()
+
+    def check_new_users(self, date):
+
+        self.connect()
+        self.cursor.execute(f"Select * from User where date = '{date}'")
+        result = self.cursor.fetchall()
+        return result
+        self.close
+
+
+    def check_week_new_users(self):
+
+        self.connect()
+        date_of_entry = dt.date.today()
+        self.cursor.execute(f"select count(*) from User where date <= (select date('now')) and date >= (select date('now', '-7 days'))")
+        result = self.cursor.fetchall()
+        return result
+        self.close()
+
 #%%
 class Interaction:
     
@@ -261,11 +306,14 @@ class Interaction:
         
     def insert_into_user_table(self, user_name, user_status):  
         self.database.insert_into_user_table(user_name, user_status)
-        
-    
+
     def print_user_table(self):
         result = self.database.print_user_table()
-        print(result)
+        return result
+
+    def check_new_users(self, date):
+       result = self.database.check_new_users(date)
+       return result
         
         
     def update_state_in_user_table(self, user_name, number_state):
@@ -274,5 +322,22 @@ class Interaction:
     def get_user_state(self, user_name):
         result = self.database.get_user_state(user_name)
         return result
-#%%
+
+
+    def create_statistic_table(self):
+        self.database.create_statistic_table()
+
+
+    def insert_into_statistic_table(self, name, action):
+        self.database.insert_into_statistic_table(name, action)
+
+
+    def print_statistic_table(self):
+        result = self.database.print_statistic_table()
+        print(result)
+
+
+    def check_week_new_users(self):
+        result = self.database.check_week_new_users()
+        return result
         

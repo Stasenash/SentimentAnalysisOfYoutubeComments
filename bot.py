@@ -1,13 +1,17 @@
 import telebot
+
+import DB
 import keyboards
 import states
 from analysis_of_one_video import AnalysisOfOneVideoActions
 from analysis_of_two_videos import AnalysisOfTwoVideosActions
-import DB
+from analysis_of_one_channel import AnalysisOfOneChannelActions
+import datetime as dt
 
 DataBase = DB.Video_DB('VideoDatabase')
 interaction = DB.Interaction(DataBase)
 interaction.create_user_table()
+interaction.create_statistic_table()
 
 def GetState(message):
     if message.from_user.username is not None:
@@ -84,13 +88,26 @@ def processing_message(message):
 
     elif message.text == "За день":
         bot.send_message(message.chat.id, "Выводим статистику", reply_markup=keyboards.back_keyboard())
+        today_date = dt.date.today()
+        data = interaction.check_new_users(today_date)
+        if data == []:
+            bot.send_message(message.chat.id, f'Количество новых пользователей за день: 0')
+        else:
+            bot.send_message(message.chat.id, f'Количество новых пользователей за день: {len(data)}')
+
 
     elif message.text == "За неделю":
         bot.send_message(message.chat.id, "Выводим статистику", reply_markup=keyboards.back_keyboard())
+        today_date = dt.date.today()
+        quantity = interaction.check_week_new_users()
+        if quantity == []:
+            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: 0')
+        else:
+            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: {quantity[0][0]}')
 
     elif message.text == "Действия пользователей за неделю":  # юзернейм действие по датам (неделя)
         bot.send_message(message.chat.id, "Выводим статистику", reply_markup=keyboards.back_keyboard())
-
+        # строка с  ас, сс, асh количество
     elif message.text == "Анализ комментариев":
         bot.send_message(message.chat.id, "Проанализировать комментарии...", reply_markup=keyboards.analysis_keyboard())
 
@@ -166,18 +183,23 @@ def processing_message(message):
     elif message.text[0:31] == "https://www.youtube.com/watch?v":
         if GetState(message) == 1:
             try:
+                if message.from_user.username is not None:
+                    interaction.insert_into_statistic_table(message.from_user.username, "ac")
+                else:
+                    interaction.insert_into_statistic_table(str(message.from_user.id), "ac")
+
                 link_video1 = message.text
                 analysis_a_single_video = AnalysisOfOneVideoActions(link_video1)
                 bot.send_message(message.chat.id, "Анализ комментариев может занять некоторое время, пожалуйста, дождитесь результата.")
                 video_info, string = analysis_a_single_video.analysis_of_comments_for_a_single_video()
                 bot.send_message(message.chat.id, video_info)
                 bot.send_message(message.chat.id, string)
-                # занесение в бд дей - ия пользователя
+
                 for i in range(1,4):
                     photo = open(f'Figures/fig_video_{analysis_a_single_video.id_video}_{i}.png', 'rb')
                     bot.send_photo(message.chat.id, photo)
                 # bot.send_message(message.chat.id, "Хотите получить wordcloud анализ?", reply_markup=keyboards.wordcloud_keyboard())
-                # if message.text == "Wordcloud":
+
                 # if message.text == "Wordcloud":
                 #     analysis_a_single_video.make_WorldCloud_picture()
                 #     bot.send_message(message.chat.id, "Выводим wordcloud анализ")
@@ -200,15 +222,23 @@ def processing_message(message):
             bot.send_message(message.chat.id, "Введите ссылку на второе видео", reply_markup=keyboards.back_keyboard())
 
         elif GetState(message) == 32:
-            link_video32 = message.text
-            bot.send_message(message.chat.id, "Выводим анализ", reply_markup=keyboards.back_keyboard())
-            compare_the_two_videos = AnalysisOfTwoVideosActions(bot.link_video31, link_video32)
-            compare_the_two_videos.comparative_analysis()
-            for i in range(1, 7):
-                photo = open(f'Figures/fig_video_comparison_{i}.png', 'rb')
-                bot.send_photo(message.chat.id, photo)
-            # записываем действия
-            SetState(message, 0)
+            try:
+                if message.from_user.username is not None:
+                    interaction.insert_into_statistic_table(message.from_user.username, "cc")
+                else:
+                    interaction.insert_into_statistic_table(str(message.from_user.id), "cc")
+                link_video32 = message.text
+                bot.send_message(message.chat.id, "Выводим анализ", reply_markup=keyboards.back_keyboard())
+                compare_the_two_videos = AnalysisOfTwoVideosActions(bot.link_video31, link_video32)
+                compare_the_two_videos.comparative_analysis()
+                for i in range(1, 7):
+                    photo = open(f'Figures/fig_video_comparison_{i}.png', 'rb')
+                    bot.send_photo(message.chat.id, photo)
+                SetState(message, 0)
+            except:
+                bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
+                                              "не исправляется - попробуйте удалить чат с ботом и попробовать "
+                                              "сначала")
 
         else:
             link_video6 = message.text
@@ -220,11 +250,24 @@ def processing_message(message):
     elif message.text[0:28] == "https://www.youtube.com/user" or message.text[
                                                                  0:31] == "https://www.youtube.com/channel":
         if GetState(message) == 2:
-            link_channel2 = message.text
-            bot.send_message(message.chat.id, "Выводим анализ", reply_markup=keyboards.wordcloud_keyboard())
-            # занесение в бд дей-ия пользователя
-            # вывод анализа + картинок
-            SetState(message, 0)
+            try:
+                if message.from_user.username is not None:
+                    interaction.insert_into_statistic_table(message.from_user.username, "ach")
+                else:
+                    interaction.insert_into_statistic_table(str(message.from_user.id), "ach")
+
+                link_channel2 = message.text
+                bot.send_message(message.chat.id, "Выводим анализ")#, reply_markup=keyboards.wordcloud_keyboard()
+                analysis_one_channel = AnalysisOfOneChannelActions(link_channel2)
+                string = analysis_one_channel.analysis_of_comments_for_a_single_channel()
+                bot.send_message(message.chat.id, string)
+                photo = open(f'Figures/fig_channel_1.png', 'rb')
+                bot.send_photo(message.chat.id, photo)
+                SetState(message, 0)
+            except:
+                bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
+                                              "не исправляется - попробуйте удалить чат с ботом и попробовать "
+                                              "сначала")
 
         elif GetState(message) == 41:
             link_channel41 = message.text

@@ -5,7 +5,7 @@ user_role="admin"
 def main_keyboard(message):
     keyboardmain = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 
-    if message.from_user.username == "ushkii": #проверка что текущий юзернейм есть в табл админов
+    if message.from_user.username == "Stasenash": #проверка что текущий юзернейм есть в табл админов
         keyboardmain.add("Функции администратора")
 
     keyboardmain.add("Анализ комментариев")
