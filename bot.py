@@ -7,11 +7,14 @@ from analysis_of_one_video import AnalysisOfOneVideoActions
 from analysis_of_two_videos import AnalysisOfTwoVideosActions
 from analysis_of_one_channel import AnalysisOfOneChannelActions
 import datetime as dt
+from blogers_wordcloud import BlogersWordcloudActions
 
 DataBase = DB.Video_DB('VideoDatabase')
 interaction = DB.Interaction(DataBase)
 interaction.create_user_table()
 interaction.create_statistic_table()
+interaction.create_table_for_admins()
+
 
 def GetState(message):
     if message.from_user.username is not None:
@@ -22,11 +25,13 @@ def GetState(message):
         state = int(data[0][1])
     return state
 
+
 def SetState(message, number_state):
     if message.from_user.username is not None:
         interaction.update_state_in_user_table(str(message.from_user.username), str(number_state))
     else:
         interaction.update_state_in_user_table(str(message.from_user.id), str(number_state))
+
 
 bot = telebot.TeleBot('1253043081:AAE_gKsMqeHl-4lBY9hRqWqbHfi_AuPsj-M')
 
@@ -108,6 +113,7 @@ def processing_message(message):
     elif message.text == "Действия пользователей за неделю":  # юзернейм действие по датам (неделя)
         bot.send_message(message.chat.id, "Выводим статистику", reply_markup=keyboards.back_keyboard())
         # строка с  ас, сс, асh количество
+
     elif message.text == "Анализ комментариев":
         bot.send_message(message.chat.id, "Проанализировать комментарии...", reply_markup=keyboards.analysis_keyboard())
 
@@ -161,7 +167,6 @@ def processing_message(message):
                          reply_markup=keyboards.back_keyboard())
         SetState(message, 52)
 
-
         # занесение в бд
         # картинка
 
@@ -188,33 +193,37 @@ def processing_message(message):
                 else:
                     interaction.insert_into_statistic_table(str(message.from_user.id), "ac")
 
-                link_video1 = message.text
-                analysis_a_single_video = AnalysisOfOneVideoActions(link_video1)
-                bot.send_message(message.chat.id, "Анализ комментариев может занять некоторое время, пожалуйста, дождитесь результата.")
+                bot.link_video1 = message.text
+                analysis_a_single_video = AnalysisOfOneVideoActions(bot.link_video1)
+                bot.send_message(message.chat.id,
+                                 "Анализ комментариев может занять некоторое время, пожалуйста, дождитесь результата.")
                 video_info, string = analysis_a_single_video.analysis_of_comments_for_a_single_video()
                 bot.send_message(message.chat.id, video_info)
                 bot.send_message(message.chat.id, string)
 
-                for i in range(1,4):
+                for i in range(1, 4):
                     photo = open(f'Figures/fig_video_{analysis_a_single_video.id_video}_{i}.png', 'rb')
                     bot.send_photo(message.chat.id, photo)
-                # bot.send_message(message.chat.id, "Хотите получить wordcloud анализ?", reply_markup=keyboards.wordcloud_keyboard())
-
-                # if message.text == "Wordcloud":
-                #     analysis_a_single_video.make_WorldCloud_picture()
-                #     bot.send_message(message.chat.id, "Выводим wordcloud анализ")
-                #     wphoto = open('Figures/picture_new.png', 'rb')
-                #     bot.send_photo(message.chat.id, wphoto)
             except:
                 bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
                                                   "не исправляется - попробуйте удалить чат с ботом и попробовать "
                                                   "сначала")
             SetState(message, 0)
-        # elif GetState(message) == 8:
-        #     bot.send_message(message.chat.id, "Выводим wordcloud анализ", reply_markup=keyboards.back_keyboard())
-        #     wphoto = open('Figures/picture_new.png', 'rb')
-        #     bot.send_photo(message.chat.id, wphoto)
-        #     SetState(message, 0)
+        elif GetState(message) == 6:
+            try:
+                if message.from_user.username is not None:
+                    interaction.insert_into_statistic_table(message.from_user.username, "wcb")
+                else:
+                    interaction.insert_into_statistic_table(str(message.from_user.id), "wcb")
+                link_video6 = message.text
+                bot.send_message(message.chat.id, "Выводим wordcloud анализ", reply_markup=keyboards.back_keyboard())
+                analysis_a_bloger_speech = BlogersWordcloudActions(link_video6)
+                analysis_a_bloger_speech.get_wordcloud_picture()
+                wphoto = open('Figures/picture_new.png', 'rb')
+                bot.send_photo(message.chat.id, wphoto)
+            except:
+                pass
+            SetState(message, 0)
 
         elif GetState(message) == 31:
             bot.link_video31 = message.text
@@ -237,8 +246,8 @@ def processing_message(message):
                 SetState(message, 0)
             except:
                 bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
-                                              "не исправляется - попробуйте удалить чат с ботом и попробовать "
-                                              "сначала")
+                                                  "не исправляется - попробуйте удалить чат с ботом и попробовать "
+                                                  "сначала")
 
         else:
             link_video6 = message.text
@@ -257,7 +266,7 @@ def processing_message(message):
                     interaction.insert_into_statistic_table(str(message.from_user.id), "ach")
 
                 link_channel2 = message.text
-                bot.send_message(message.chat.id, "Выводим анализ")#, reply_markup=keyboards.wordcloud_keyboard()
+                bot.send_message(message.chat.id, "Выводим анализ")  # , reply_markup=keyboards.wordcloud_keyboard()
                 analysis_one_channel = AnalysisOfOneChannelActions(link_channel2)
                 string = analysis_one_channel.analysis_of_comments_for_a_single_channel()
                 bot.send_message(message.chat.id, string)
@@ -266,8 +275,8 @@ def processing_message(message):
                 SetState(message, 0)
             except:
                 bot.send_message(message.chat.id, "Произошла непредвиденная ошибка, попробуйте еще раз. Если ошибка "
-                                              "не исправляется - попробуйте удалить чат с ботом и попробовать "
-                                              "сначала")
+                                                  "не исправляется - попробуйте удалить чат с ботом и попробовать "
+                                                  "сначала")
 
         elif GetState(message) == 41:
             link_channel41 = message.text
@@ -302,15 +311,28 @@ def processing_message(message):
 
     else:
         if GetState(message) == 71:
-            username71 = message.text
-            # делаем админом
-            bot.send_message(message.chat.id, "Новый администратор добавлен", reply_markup=keyboards.back_keyboard())
+            try:
+                username71 = message.text
+                if interaction.get_user_admin(message.from_user.username) is None \
+                        and interaction.get_user(message.from_user.username) is not None:
+                    interaction.insert_into_admins_table(username71)
+                    bot.send_message(message.chat.id, "Новый администратор добавлен",
+                                     reply_markup=keyboards.back_keyboard())
+                else:
+                    bot.send_message(message.chat.id, "Добавление не удалось. Возможно, такого пользователя не "
+                                                      "существует, или он уже является администратором",
+                                     reply_markup=keyboards.back_keyboard())
+            except:
+                pass
             SetState(message, 0)
 
         elif GetState(message) == 72:
-            username72 = message.text
-            # удаляем с админов
-            bot.send_message(message.chat.id, "Администратор удален", reply_markup=keyboards.back_keyboard())
+            try:
+                username72 = message.text
+                interaction.delete_from_admins_table(username72)
+                bot.send_message(message.chat.id, "Администратор удален", reply_markup=keyboards.back_keyboard())
+            except:
+                pass
             SetState(message, 0)
 
         else:

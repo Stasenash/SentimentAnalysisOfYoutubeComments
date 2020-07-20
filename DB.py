@@ -35,12 +35,24 @@ class Video_DB:
                         (_id text, comment text,
                         FOREIGN KEY (_id) REFERENCES {self.table_name}(video_id) ON DELETE CASCADE)""")
         self.close()
-        
-    
+
+    def create_table_for_admins(self):
+
+        self.connect()
+        self.cursor.execute(f"""CREATE TABLE IF NOT EXISTS Admins 
+                        (u_name text,
+                        FOREIGN KEY (u_name) REFERENCES User (user_name) ON DELETE CASCADE)""")
+        self.close()
+
     def insert_into_comments_table(self, _id, comment):
         
         self.connect()
         self.cursor.execute(f"""INSERT INTO Comments VALUES ('{_id}', '{comment}')""")
+        self.close()
+
+    def insert_into_admins_table(self, u_name):
+        self.connect()
+        self.cursor.execute(f"""INSERT INTO Admins VALUES ('{u_name}')""")
         self.close()
         
     
@@ -143,6 +155,12 @@ class Video_DB:
         self.connect()
         self.cursor.execute(f"""DELETE FROM Favourites WHERE youtube_link = '{link}' and person_id = '{user_id}'""")
         self.close()
+
+    def delete_from_admins_table(self, name):
+
+        self.connect()
+        self.cursor.execute(f"""DELETE FROM Admins WHERE u_name = '{name}'""")
+        self.close()
         
         
     def print_favorites_table(self, user_id):
@@ -202,6 +220,20 @@ class Video_DB:
         self.close()
 
 
+    def get_user_admin(self, name):
+        self.connect()
+        self.cursor.execute(f"select u_name from Admins where u_name = '{name}'")
+        result = self.cursor.fetchall()
+        return result
+        self.close()
+
+    def get_user(self, name):
+        self.connect()
+        self.cursor.execute(f"select u_name from User where u_name = '{name}'")
+        result = self.cursor.fetchall()
+        return result
+        self.close()
+
     def create_statistic_table(self):
 
         self.connect()
@@ -215,7 +247,7 @@ class Video_DB:
 
         self.connect()
         date_of_entry = dt.date.today()
-        self.cursor.execute(f"""INSERT INTO User VALUES ('{name}', '{action}', '{date_of_entry}')""")
+        self.cursor.execute(f"""INSERT INTO Statistic VALUES ('{name}', '{action}', '{date_of_entry}')""")
         self.close()
 
 
@@ -276,21 +308,33 @@ class Interaction:
         
     def insert_into_comments_table(self, video_id, comment):
         self.database.insert_into_comments_table(video_id, comment)
-    
+
+    def insert_into_admins_table(self, u_name):
+        self.database.insert_into_admins_table(u_name)
     
     def print_comments(self, _id):
         text = self.database.print_comments(_id)
         return text
-    
-    
+
+    def get_user_admin(self, name):
+        res = self.database.get_user_admin(name)
+        return res
+
+    def get_user(self, name):
+        res = self.database.get_user(name)
+        return res
+
     def create_favourites_table(self):
         self.database.create_favourites_table()
         
         
     def insert_into_favourites_table(self, person_id, youtube_link):
         self.database.insert_into_favourites_table(person_id, youtube_link)
-        
-        
+
+    def delete_from_admins_table(self, name):
+        self.database.delete_from_admins_table(name)
+
+
     def delete_from_favourites_table(self, user_id, link):
         self.database.delete_from_favourites_table(user_id, link)
 
@@ -302,6 +346,10 @@ class Interaction:
     
     def create_user_table(self):
         self.database.create_user_table()
+
+
+    def create_table_for_admins(self):
+        self.database.create_table_for_admins()
         
         
     def insert_into_user_table(self, user_name, user_status):  

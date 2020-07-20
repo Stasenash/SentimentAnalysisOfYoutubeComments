@@ -2,7 +2,7 @@ import Additionally
 from urllib.parse import urlparse
 
 #%%
-class FifthBranch_actions:
+class BlogersWordcloudActions:
     
     def __init__(self, link):
         

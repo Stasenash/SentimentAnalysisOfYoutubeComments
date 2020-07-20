@@ -5,7 +5,7 @@ import Essences
 import matplotlib.pyplot as plt
 from data_analyzer import DataAnalyzer
 #%%
-class FourthBranch_actions:
+class AnalysisOfTwoChannelsActions:
     
     def __init__(self, link1, link2):
 
@@ -305,7 +305,7 @@ class FourthBranch_actions:
         
                 
 #%%
-fourth = FourthBranch_actions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC9FSprjbRqHtsfxbxVO_JWA')
+fourth = AnalysisOfTwoChannelsActions('https://www.youtube.com/user/InokTV', 'https://www.youtube.com/channel/UC9FSprjbRqHtsfxbxVO_JWA')
 ##%%
 fourth.comparative_analysis()
 

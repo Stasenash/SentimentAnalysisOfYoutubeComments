@@ -1,12 +1,24 @@
 from telebot import types
 
+import DB
+
 user_role="admin"
+try:
+    DataBase = DB.Video_DB('VideoDatabase')
+    interaction = DB.Interaction(DataBase)
+    interaction.create_table_for_admins()
+except:
+    pass
 
 def main_keyboard(message):
     keyboardmain = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 
-    if message.from_user.username == "Stasenash": #проверка что текущий юзернейм есть в табл админов
-        keyboardmain.add("Функции администратора")
+    if message.from_user.username is not None:
+        if interaction.get_user_admin(message.from_user.username) is not None:
+            keyboardmain.add("Функции администратора")
+    else:
+        if interaction.get_user_admin(message.from_user.id) is not None:
+            keyboardmain.add("Функции администратора")
 
     keyboardmain.add("Анализ комментариев")
     keyboardmain.add("Сравнение комментариев")
