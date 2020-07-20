@@ -14,6 +14,7 @@ interaction = DB.Interaction(DataBase)
 interaction.create_user_table()
 interaction.create_statistic_table()
 interaction.create_table_for_admins()
+interaction.create_favourites_table()
 
 
 def GetState(message):
@@ -96,9 +97,9 @@ def processing_message(message):
         today_date = dt.date.today()
         data = interaction.check_new_users(today_date)
         if data == []:
-            bot.send_message(message.chat.id, f'Количество новых пользователей за день: 0')
+            bot.send_message(message.chat.id, f'Количество новых пользователей за день: 0', reply_markup=keyboards.back_keyboard())
         else:
-            bot.send_message(message.chat.id, f'Количество новых пользователей за день: {len(data)}')
+            bot.send_message(message.chat.id, f'Количество новых пользователей за день: {len(data)}', reply_markup=keyboards.back_keyboard())
 
 
     elif message.text == "За неделю":
@@ -106,13 +107,39 @@ def processing_message(message):
         today_date = dt.date.today()
         quantity = interaction.check_week_new_users()
         if quantity == []:
-            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: 0')
+            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: 0', reply_markup=keyboards.back_keyboard())
         else:
-            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: {quantity[0][0]}')
+            bot.send_message(message.chat.id, f'Количество новых пользователей за неделю: {quantity[0][0]}', reply_markup=keyboards.back_keyboard())
 
     elif message.text == "Действия пользователей за неделю":  # юзернейм действие по датам (неделя)
         bot.send_message(message.chat.id, "Выводим статистику", reply_markup=keyboards.back_keyboard())
-        # строка с  ас, сс, асh количество
+        string = ''
+        action_ac = interaction.print_actions_from_statistic_table('ac')
+        if action_ac == []:
+            string += 'Анализ комментариев под видео: 0 раз\n'
+        else:
+            string += f'Анализ комментариев под видео: {len(action_ac)} раз' + '\n'
+
+        action_cc = interaction.print_actions_from_statistic_table('cc')
+        if action_cc == []:
+            string += 'Сравнение двух видео: 0 раз\n'
+        else:
+            string += f'Сравнение двух видео: {len(action_cc)} раз' + '\n'
+
+        action_ach = interaction.print_actions_from_statistic_table('ach')
+        if action_ach == []:
+            string += 'Анализ комментариев на канале: 0 раз\n'
+        else:
+            string += f'Анализ комментариев на канале: {len(action_ach)} раз' + '\n'
+
+        action_wcb = interaction.print_actions_from_statistic_table('wcb')
+        if action_wcb == []:
+            string += 'Wordcloud речи блогера: 0 раз\n'
+        else:
+            string += f'Wordcloud речи блогера: {len(action_wcb)} раз' +'\n'
+
+        bot.send_message(message.chat.id, string, reply_markup=keyboards.back_keyboard())
+
 
     elif message.text == "Анализ комментариев":
         bot.send_message(message.chat.id, "Проанализировать комментарии...", reply_markup=keyboards.analysis_keyboard())
@@ -155,11 +182,20 @@ def processing_message(message):
 
     elif message.text == "Посмотреть избранное":
         bot.send_message(message.chat.id, "Выводим список избранных", reply_markup=keyboards.back_keyboard())
+        if message.from_user.username is not None:
+            favourites = interaction.print_favorites_table(message.from_user.username)
+        else:
+            favourites = interaction.insert_into_statistic_table(str(message.from_user.id))
+        count = 1
+        string = ''
+        for i in favourites:
+            string += f'{count}. i[1]'
+
+        bot.send_message(message.chat.id, string, reply_markup=keyboards.back_keyboard())
 
     elif message.text == "Добавить в избранное":
         # проверка на количесвто избранных (макс 10)
-        bot.send_message(message.chat.id, "Введите ссылку, которую вы хотите добавить в избранное",
-                         reply_markup=keyboards.back_keyboard())
+        bot.send_message(message.chat.id, "Введите ссылку, которую вы хотите добавить в избранное", reply_markup=keyboards.back_keyboard())
         SetState(message, 51)
 
     elif message.text == "Удалить из избранного":
@@ -293,9 +329,14 @@ def processing_message(message):
     elif message.text[0:23] == "https://www.youtube.com":
         if GetState(message) == 51:  # getstate
             link_fav51 = message.text
-            # добавить в избранное
-            bot.send_message(message.chat.id, "Ссылка добавлена в избранное",
-                             reply_markup=keyboards.back_keyboard())
+            data = interaction.check_in_favourites(link_fav51)
+            if data == []:
+                bot.send_message(message.chat.id, "Данная ссылка уже существует в Избранном", reply_markup=keyboards.back_keyboard())
+            else:
+                if message.from_user.username is not None:
+                    interaction.insert_into_favourites_table(message.from_user.username,link_fav51)
+                else:
+                    interaction.insert_into_favourites_table(str(message.from_user.id), link_fav51)
             SetState(message, 0)
 
         elif states.GetState(message) == 52:
@@ -312,9 +353,9 @@ def processing_message(message):
     else:
         if GetState(message) == 71:
             try:
-                username71 = message.text
-                if interaction.get_user_admin(message.from_user.username) is None \
-                        and interaction.get_user(message.from_user.username) is not None:
+                username71 = message.text #TODO ошибка с админкой
+                if interaction.get_user_admin(username71) is None \
+                        and interaction.get_user(username71) is not None:
                     interaction.insert_into_admins_table(username71)
                     bot.send_message(message.chat.id, "Новый администратор добавлен",
                                      reply_markup=keyboards.back_keyboard())

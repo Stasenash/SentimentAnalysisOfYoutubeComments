@@ -166,16 +166,8 @@ class Video_DB:
     def print_favorites_table(self, user_id):
         
         self.connect()
-        count = 1
-        text = ''
         self.cursor.execute(f"""SELECT * FROM Favourites WHERE person_id = '{user_id}'""")
         massive = self.cursor.fetchall()
-        
-        for item in massive:
-            text += f'{count}. {item[0]}-{item[1]}' + '\n'           
-            count += 1
-            
-        return text
         self.close()
     
 
@@ -229,7 +221,7 @@ class Video_DB:
 
     def get_user(self, name):
         self.connect()
-        self.cursor.execute(f"select u_name from User where u_name = '{name}'")
+        self.cursor.execute(f"select user_name from User where user_name = '{name}'")
         result = self.cursor.fetchall()
         return result
         self.close()
@@ -251,13 +243,15 @@ class Video_DB:
         self.close()
 
 
-    def print_statistic_table(self):
+    def print_actions_from_statistic_table(self, action):
 
         self.connect()
-        self.cursor.execute(f"SELECT * from Statistic")
+        date_of_entry = dt.date.today()
+        self.cursor.execute(
+            f"select * from Statistic where date <= (select date('now')) and date >= (select date('now', '-7 days')) and action = '{action}'")
         result = self.cursor.fetchall()
         return result
-        self.close()
+
 
     def check_new_users(self, date):
 
@@ -277,7 +271,15 @@ class Video_DB:
         return result
         self.close()
 
-#%%
+
+    def check_in_favourites(self, link):
+
+        self.connect()
+        result = self.cursor.execute(f"select * from Favourites where youtube_link = '{link}'")
+        return result
+        self.close()
+
+        #%%
 class Interaction:
     
     def __init__(self, database):        
@@ -380,12 +382,14 @@ class Interaction:
         self.database.insert_into_statistic_table(name, action)
 
 
-    def print_statistic_table(self):
-        result = self.database.print_statistic_table()
-        print(result)
+    def print_actions_from_statistic_table(self, action):
+        result = self.database.print_actions_from_statistic_table(action)
+        return result
 
 
     def check_week_new_users(self):
         result = self.database.check_week_new_users()
         return result
         
+    def check_in_favourites(self, link):
+        self.database.check_in_favourites(link)
